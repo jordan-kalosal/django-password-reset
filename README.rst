@@ -1,5 +1,12 @@
-Django-password-reset
+Django-password-reset-mandrill
 =====================
+Forked from https://travis-ci.org/brutasse/django-password-reset.
+This fork empowers django-password-reset to use Mandrill to send emails.  
+It is assumed that https://github.com/brack3t/Djrill (Djrill) is installed to replace
+standard Django email functionality with Mandrill transactional emails.
+
+All instructions and features of django-password-reset still apply.
+
 
 .. image:: https://travis-ci.org/brutasse/django-password-reset.svg?branch=master
    :alt: Build Status
@@ -23,7 +30,7 @@ functionality.
 Installation
 ------------
 
-* ``pip install -U django-password-reset``
+* Download this repository, copy the ``password_reset`` folder to your project directory (same level as manage.py)
 * Add ``password_reset`` to your ``INSTALLED_APPS``
 * Include ``password_reset.urls`` in your root ``urls.py``
 
@@ -32,12 +39,3 @@ readthedocs`_
 
 .. _read it on readthedocs: http://django-password-reset.readthedocs.org/
 
-To install the `in-development version`_ of django-password-reset, run ``pip
-install django-password-reset==dev``.
-
-.. _in-development version: https://github.com/brutasse/django-password-reset/tarball/master#egg=django-password-reset-dev
-
-Bugs
-----
-
-Really? Oh well... Please Report. Or better, fix :)
