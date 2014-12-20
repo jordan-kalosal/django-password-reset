@@ -3,7 +3,7 @@ import datetime
 from django.conf import settings
 from django.contrib.sites.models import Site, RequestSite
 from django.core import signing
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.shortcuts import get_object_or_404, redirect
 from django.http import Http404
@@ -85,12 +85,15 @@ class Recover(SaltMixin, generic.FormView):
             'token': signing.dumps(self.user.pk, salt=self.salt),
             'secure': self.request.is_secure(),
         }
-        body = loader.render_to_string(self.email_template_name,
+        html_body = loader.render_to_string(self.email_template_name,
                                        context).strip()
         subject = loader.render_to_string(self.email_subject_template_name,
                                           context).strip()
-        send_mail(subject, body, settings.DEFAULT_FROM_EMAIL,
-                  [self.user.email])
+
+        msg = EmailMultiAlternatives(subject=subject, from_email=settings.DEFAULT_FROM_EMAIL, to=[self.user.email])
+        msg.attach_alternative(html_body, "text/html")
+        msg.send()
+        
 
     def form_valid(self, form):
         self.user = form.cleaned_data['user']
