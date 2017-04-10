@@ -1,0 +1,1 @@
+{% load i18n %}{% if platform == "prompt" %}Prompt{% else %}Editate{% endif %} password recovery

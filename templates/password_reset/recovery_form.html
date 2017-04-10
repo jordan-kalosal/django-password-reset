@@ -1,0 +1,10 @@
+{% extends "password_reset/base.html" %}
+{% load i18n %}
+{% block password-reset-content %}
+<h2>Lose your password?  No problem!</h2>
+<form method="post" action="{{ url }}">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<p><input class="btn btn-lg btn-primary" type="submit" value="{% trans "Recover my password" %}"></p>
+</form>
+{% endblock %}

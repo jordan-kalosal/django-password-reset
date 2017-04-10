@@ -1,0 +1,13 @@
+{% extends "password_reset/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Password recovery sent" %}{% endblock %}
+
+{% block password-reset-content %}
+<div class="row password-reset">
+	<div class="col-sm-12 center">
+		<h2>Password Reset</h2>
+		<p>An email was sent to {{ email }} with a link to reset your password.</p>
+	</div>
+</div>
+{% endblock %}

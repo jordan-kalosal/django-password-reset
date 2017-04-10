@@ -1,0 +1,20 @@
+{% extends "password_reset/base.html" %}{% load i18n %}
+
+{% block title %}{% trans "New password set" %}{% endblock %}
+
+{% block password-reset-content %}
+
+<div class="row password-reset">
+	<div class="col-sm-12 center">
+		<h2>Password Reset</h2>
+		<p>Your password has successfully been reset. You can use it right now on the login page.</p>
+		<p>
+			{% if platform == "prompt" %}
+			<a href="/login/" data-toggle="modal" class="btn btn-sm btn-primary">Login Now</a>
+			{% else %}
+			<a href="/" class="btn btn-sm btn-primary">Login Now</a>
+			{% endif %}
+		</p>
+	</div>
+</div>
+{% endblock %}

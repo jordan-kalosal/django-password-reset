@@ -1,0 +1,38 @@
+{% extends "erEditRevise/base.html" %}
+{% load i18n %}
+{% load staticfiles %}
+{% load url from future %}
+
+{% block title %}{% trans "Password recovery" %}{% endblock %}
+
+{% block banner %} {% endblock %}
+{% block navbar %} {% endblock %}
+{% block footer %} {% endblock %}
+{% block content %}
+{% if platform == "prompt" %}
+<div class="row">
+	<div class="col-sm-12 center">
+		<img class="logo" alt="Prompt" src="{% static "erEditRevise/img/logo/prompt1_64px.png" %}">
+	</div>
+</div>
+{% elif platform == "counselor" %}
+{% if subdomain and subdomain.counselor_profile and subdomain.counselor_profile.logo %}
+<div class="row">
+	<div class="col-sm-12 center">
+		<img class="logo" src="{% if subdomain.counselor_profile.logo %} {{ subdomain.counselor_profile.logo.url }} {% endif %}" alt="{{ subdomain.counselor_profile.page_title }}">
+	</div>
+</div>
+{% elif subdomain and subdomain.counselor_organization and subdomain.counselor_organization.logo %}
+<div class="row">
+	<div class="col-sm-12 center">
+		<img class="logo" src="{% if subdomain.counselor_organization.logo %} {{ subdomain.counselor_organization.logo.url }} {% endif %}" alt="{{ subdomain.counselor_organization.name }}">
+	</div>
+</div>
+{% endif %}
+{% endif %}
+<div class="row password-reset">
+	<div class="col-sm-12 center">
+		{% block password-reset-content %} {% endblock %}
+	</div>
+</div>
+{% endblock %}
