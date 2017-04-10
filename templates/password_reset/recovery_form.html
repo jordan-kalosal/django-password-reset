@@ -2,6 +2,7 @@
 {% load i18n %}
 {% block password-reset-content %}
 <h2>Lose your password?  No problem!</h2>
+<p>Enter your email address below to reset your password</p>
 <form method="post" action="{{ url }}">
 	{% csrf_token %}
 	{{ form.as_p }}

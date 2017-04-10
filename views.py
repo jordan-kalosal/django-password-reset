@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.debug import sensitive_post_parameters
+from django.core.mail import EmailMultiAlternatives
 
 try:
     from django.contrib.sites.shortcuts import get_current_site
@@ -20,6 +21,8 @@ except ImportError:
 from .forms import PasswordRecoveryForm, PasswordResetForm
 from .signals import user_recovers_password
 from .utils import get_user_model, get_username
+
+from erAdmissions.models import CounselorProfile, StudentProfile
 
 
 class SaltMixin(object):
@@ -58,7 +61,7 @@ class Recover(SaltMixin, generic.FormView):
     form_class = PasswordRecoveryForm
     template_name = 'password_reset/recovery_form.html'
     success_url_name = 'password_reset_sent'
-    email_template_name = 'password_reset/recovery_email.txt'
+    email_template_name = 'password_reset/recovery_email.html'
     email_subject_template_name = 'password_reset/recovery_email_subject.txt'
     search_fields = ['username', 'email']
 
@@ -81,19 +84,36 @@ class Recover(SaltMixin, generic.FormView):
         return get_current_site(self.request)
 
     def send_notification(self):
+        admissions_user = None
+        if CounselorProfile.objects.filter(profile__user=self.user).exists():
+            admissions_user = CounselorProfile.objects.get(profile__user=self.user)
+        elif StudentProfile.objects.filter(profile__user=self.user).exists():
+            admissions_user = StudentProfile.objects.get(profile__user=self.user)
         context = {
             'site': self.get_site(),
+            'site_url': settings.SITE_URL,
             'user': self.user,
             'username': get_username(self.user),
             'token': signing.dumps(self.user.pk, salt=self.salt),
             'secure': self.request.is_secure(),
         }
-        body = loader.render_to_string(self.email_template_name,
+        if admissions_user:
+            context['admissions_user'] = admissions_user
+            context['organization'] = admissions_user.organization
+
+            body = loader.render_to_string("erAdmissions/recover_password_email.html",
                                        context).strip()
-        subject = loader.render_to_string(self.email_subject_template_name,
-                                          context).strip()
-        send_mail(subject, body, settings.DEFAULT_FROM_EMAIL,
-                  [self.user.email])
+            subject = "Recover password for %s's College Application Management Platform" % (admissions_user.organization.page_title)
+            from_email="Editate <support@editate.com>"
+        else:
+            body = loader.render_to_string("erEditRevise/email/recover_password.html", context).strip()
+            subject = "Recover password for Prompt"
+            from_email="Prompt <support@prompt.com>"
+        
+        msg = EmailMultiAlternatives(subject=subject, from_email=from_email, to=[self.user.email])
+        msg.attach_alternative(body, "text/html")
+        msg.send()
+        return True
 
     def form_valid(self, form):
         self.user = form.cleaned_data['user']

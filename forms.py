@@ -30,7 +30,7 @@ class PasswordRecoveryForm(forms.Form):
         labels = {
             'username': _('Username'),
             'email': _('Email'),
-            'both': _('Username or Email'),
+            'both': _('Email'),
         }
         User = get_user_model()  # noqa
         if getattr(User, 'USERNAME_FIELD', 'username') == 'email':
