@@ -28,14 +28,28 @@ Contents:
 Changelog
 ---------
 
-* 0.8 (not released yet):
+* 0.9 (2016-06-01):
+
+  * Allow token expiration time to be customized with a setting.
+
+* 0.8.2 (2016-01-12):
+
+  * Django 1.9 compatibility (Josh Kelley).
+
+* 0.8.1 (2015-10-30):
+
+  * Add pt_BR translation (GitHub user eduardo-matos).
+
+* 0.8 (2015-10-30):
 
   * Allow customizing form error message via the ``error_messages`` attribute
     on form classes.
 
-  * Add Georgian translation (GitHub user  gigovich).
+  * Add Georgian translation (GitHub user gigovich).
 
   * Add Norwegian translation (GitHub user gunnaringe).
+
+  * Tested on django 1.5 to 1.8 and Python 2.6 to 3.4.
 
 * 0.7 (2014-02-18):
 

@@ -1,19 +1,25 @@
 import datetime
 
 from django.conf import settings
-from django.contrib.sites.models import Site, RequestSite
 from django.core import signing
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.shortcuts import get_object_or_404, redirect
 from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect
 from django.template import loader
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.views import generic
+from django.views.decorators.debug import sensitive_post_parameters
+
+try:
+    from django.contrib.sites.shortcuts import get_current_site
+except ImportError:
+    from django.contrib.sites.models import get_current_site
 
 from .forms import PasswordRecoveryForm, PasswordResetForm
-from .utils import get_user_model, get_username
 from .signals import user_recovers_password
+from .utils import get_user_model, get_username
 
 
 class SaltMixin(object):
@@ -25,7 +31,7 @@ def loads_with_timestamp(value, salt):
     """Returns the unsigned value along with its timestamp, the time when it
     got dumped."""
     try:
-        signing.loads(value, salt=salt, max_age=-1)
+        signing.loads(value, salt=salt, max_age=-999999)
     except signing.SignatureExpired as e:
         age = float(str(e).split('Signature age ')[1].split(' >')[0])
         timestamp = timezone.now() - datetime.timedelta(seconds=age)
@@ -33,7 +39,7 @@ def loads_with_timestamp(value, salt):
 
 
 class RecoverDone(SaltMixin, generic.TemplateView):
-    template_name = "password_reset/reset_sent.html"
+    template_name = 'password_reset/reset_sent.html'
 
     def get_context_data(self, **kwargs):
         ctx = super(RecoverDone, self).get_context_data(**kwargs)
@@ -72,10 +78,7 @@ class Recover(SaltMixin, generic.FormView):
         return kwargs
 
     def get_site(self):
-        if Site._meta.installed:
-            return Site.objects.get_current()
-        else:
-            return RequestSite(self.request)
+        return get_current_site(self.request)
 
     def send_notification(self):
         context = {
@@ -114,17 +117,27 @@ recover = Recover.as_view()
 
 class Reset(SaltMixin, generic.FormView):
     form_class = PasswordResetForm
-    token_expires = 3600 * 48  # Two days
+    token_expires = None
     template_name = 'password_reset/reset.html'
     success_url = reverse_lazy('password_reset_done')
 
+    def get_token_expires(self):
+        duration = getattr(settings, 'PASSWORD_RESET_TOKEN_EXPIRES',
+                           self.token_expires)
+        if duration is None:
+            duration = 3600 * 48  # Two days
+        return duration
+
+    @method_decorator(sensitive_post_parameters('password1', 'password2'))
     def dispatch(self, request, *args, **kwargs):
         self.request = request
         self.args = args
         self.kwargs = kwargs
+        self.user = None
 
         try:
-            pk = signing.loads(kwargs['token'], max_age=self.token_expires,
+            pk = signing.loads(kwargs['token'],
+                               max_age=self.get_token_expires(),
                                salt=self.salt)
         except signing.BadSignature:
             return self.invalid()
